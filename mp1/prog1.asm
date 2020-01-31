@@ -104,9 +104,69 @@ PRINT_HIST
 ; for your implementation, list registers used in this part of the code,
 ; and provide sufficient comments
 
+; Intro: In this MP we take the input string and compute the histogram for it, which is then printed to the screen
+;		 The histogram code is provided to us, we needed to implement the Print hist part, which required us to
+;		 calculate the offsets and then print to to screen with the character, space then the value of how many times
+;		 the character repeated in the string. Then move the next line and do it all over again, until we reach Z.
+;		 All the tests are correct after the testing!
+;
+; partners: stancs2, anudeep2, asanag2
 
 
-DONE	HALT			; done
+PRINT_HIST	
+
+			LD R5, HIST_ADDR    ; load the starting address of the histogram into R5
+			LD R3, NUM_BINS     ; load the bin counter into R3
+
+BIN_OUT		LD R2, AT_ASCIICODE ; load the ASCII value of @ into R2 to use it as an offset
+			LD R6, HIST_ADDR    ; load the starting address of the histogram into R6
+			NOT R6, R6			;
+			ADD R6, R6, #1		;
+			ADD R6, R5, R6      ; subtract R6 from R5 to obtain ASCII offset
+
+LABEL_SPACE	ADD R0, R2, R6		; add the offset to the histogram starting address
+			OUT  ; print out bin label
+			LD R0, SPACE_ASCIICODE ; load the ASCII value for space and print out
+			OUT; print out to screen
+
+HIST_DATA	AND R0, R0, #0		; clear out R0
+			AND R2, R2, #0		; clear out R2
+			AND R4, R4, #0		; clear out R4
+			AND R6, R6, #0		; clear out R6
+			LD R6, NUM_OFFSET   ; Load ASCII numerical offset into R6
+			LDR R1, R5, #0 		; load the data in the current histogram address into R1
+			ADD R4, R4, #4 		; initialize digit counter
+
+EACH_GROUP	ADD R2, R2, #4 		; initialize bit counter
+			AND R0, R0, #0 		; clear out R0
+
+EACH_BIT 	ADD R0, R0, R0 		; left shift digit holder
+			ADD R1, R1, #0 		; check sign of test value
+			BRzp TESTSHIFT
+			ADD R0, R0, #1 		; add 1 to R0
+
+TESTSHIFT 	ADD R1, R1, R1 		; left shift test value
+			ADD R2, R2, #-1		; decrement bit counter
+			BRp EACH_BIT		;
+
+PRINT   	ADD R0, R0, #-9 	; subtract 9 from R0
+			BRnz OFFSET
+			ADD R0, R0, #7  	; add 7 to R0
+
+OFFSET  	ADD R0, R0, #9  	; add back previously subtracted 9
+			ADD R0, R6, R0 		; add ASCII offset to number
+			OUT      			;
+			ADD R4, R4, #-1 	; decrement digit counter
+			BRp EACH_GROUP		; if postive, digits still
+
+			LD R0, NEWLINE_CHAR	; print newline
+			OUT					; print to screen
+			ADD R5, R5, #1  	; increment histogram pointer
+			ADD R3, R3, #-1		; decrement bin counter
+			BRp BIN_OUT			; if pos, continue till Z
+			BRnz DONE 			; done
+
+DONE		HALT				; done
 
 
 ; the data needed by the program
