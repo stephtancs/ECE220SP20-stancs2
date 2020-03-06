@@ -4,12 +4,9 @@
  *           student code -- GOLD VERSION by Steven S. Lumetta
  */
 
-
-/*
- * The functions that you must write are defined in the header file.
- * Blank function prototypes with explanatory headers are provided
- * in this file to help you get started.
- */
+/* This code takes in a user specified seed in order to create 4 random numbers. The user then must guess these numbers in the correct order in 12 or fewer tries. After each guess, the user will be supplied with the amount of perfect matches that they have guessed as well as the number of misplaced matches.
+partners: stancs2, anudeep2, asanag2
+*/
 
 
 
@@ -86,10 +83,14 @@ int set_seed (const char seed_str[]) {
 //    You may need to change the return statement below
     int seed;
     char post[2];
+    //incorrect seed
     if (sscanf (seed_str, "%d%1s", &seed, post) != 1) {
-      // your code here
+       printf("set_seed: invalid seed\n");
+       return 0;
     }
-    // your code here
+    //valid seed
+    srand(seed);
+    return 1;
 }
 
 
@@ -107,7 +108,15 @@ int set_seed (const char seed_str[]) {
  * SIDE EFFECTS: records the solution in the static solution variables for use by make_guess, set guess_number
  */
 void start_game () {
-    //your code here
+  //sets guess and score
+  guess_number = 1; 
+  max_score = -1;
+  //sets random numbers to be assigned to pool indices
+  for(int i = 0; i < 4; i++){
+    int rando = (rand())%8;
+    strcpy(solutions[i],pool[rando]);
+  }
+  
 }
 
 /*
@@ -131,6 +140,66 @@ void start_game () {
  */
 int make_guess (const char guess_str[]) {
   // your code here
+  char guessPool[4][10]; //guess array
+  char extra[2]; //overflow array
+  int score=0; //current score
+  int missed=0; //mismatched and perfect
+  int perfect=0;
+  int matched[] = {0,0,0,0}; //matched checker array
+  
+  //intakes guess
+  int guessNum = sscanf(guess_str,"%s%s%s%s%1s",guessPool[0],guessPool[1],guessPool[2],guessPool[3],extra); //fills guess array
+  
+  //invalidity
+  if(guessNum != 4){
+     printf("make_guess: invalid guess\n");
+     return 0;
+  }
+  for(int i = 0; i < 4; i++){
+    if( is_valid(guessPool[i]) == 0){
+       printf("make_guess: invalid guess\n");
+       return 0;
+    }
+  }
+  
+  //loops through to find perfect matches and records them in tracker array
+  for(int j = 0; j < 4; j++){
+    if(strcmp(guessPool[j],solutions[j])==0){
+      matched[j]=1;
+      perfect++;
+    }
+  }
+
+  //loops through array to find mismatches, breaks inner loop when mismatch encountered
+  for(int k = 0; k < 4; k++){
+    for(int l = 0; l < 4; l++){
+      if(strcmp(guessPool[k],solutions[l])==0){
+	      if(matched[k]==0&&matched[l]==0){
+	        missed++;
+          break;
+	      }
+      }
+    }
+  }
+
+  //changes score
+  score=(perfect*1000)+(missed*100); //score is equal to 1000pts per perfect match and 100pts per misplaced match
+  if(guess_number==1){ 
+    max_score=score; //set max_score equal to score if only 1 guess mas been made
+  } 
+  else{ 
+    if(score>max_score){ 
+      max_score=score; //if current score is greater, set max_score equal to current score
+    }
+  }
+  //final print statement
+  printf("With guess %d, you got %d perfect matches and %d misplaced matches.\nYour score is %d and current max score is %d.\n",guess_number,perfect,missed,score,max_score);
+
+  //new guess
+  guess_number++;
+  //test for perfect and return
+  if(perfect==4){
+    return 2;
+  }
+  return 1;
 }
-
-
