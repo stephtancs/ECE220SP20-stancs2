@@ -4,7 +4,7 @@
  *           student code -- GOLD VERSION by Steven S. Lumetta
  */
 
-/* This code takes in a user specified seed in order to create 4 random numbers. The user then must guess these numbers in the correct order in 12 or fewer tries. After each guess, the user will be supplied with the amount of perfect matches that they have guessed as well as the number of misplaced matches.
+/* This code takes in a user specified seed in order to create 4 random numbers that are assigned to strings in a pool. The user then must guess these numbers in the correct order in 10 or fewer tries. After each guess, the user will be supplied with the amount of perfect matches that they have guessed as well as the number of misplaced matches.
 partners: stancs2, anudeep2, asanag2
 */
 
