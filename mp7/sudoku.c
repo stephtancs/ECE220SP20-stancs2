@@ -1,7 +1,8 @@
 #include "sudoku.h"
 
 //-------------------------------------------------------------------------------------------------
-// Start here to work on your MP7
+// mp7: this function solves a pre-started sudoku table accurately.
+// partners: stancs2, asanag2, anudeep2
 //-------------------------------------------------------------------------------------------------
 
 // You are free to declare any private functions if needed.
@@ -13,7 +14,12 @@ int is_val_in_row(const int val, const int i, const int sudoku[9][9]) {
   assert(i>=0 && i<9);
 
   // BEG TODO
-  
+
+  //loop through by keeping row constant and varying column index to check entire row
+  for(int col = 0; col<9; col++){
+    if(val==sudoku[i][col])
+      return 1;
+  }
   return 0;
   // END TODO
 }
@@ -25,7 +31,12 @@ int is_val_in_col(const int val, const int j, const int sudoku[9][9]) {
   assert(j>=0 && j<9);
 
   // BEG TODO
-  
+
+  //loop through by keeping column constant and varying row index to check entire column
+  for(int row=0; row<9; row++){
+    if(val==sudoku[row][j])
+      return 1;
+  }
   return 0;
   // END TODO
 }
@@ -38,6 +49,16 @@ int is_val_in_3x3_zone(const int val, const int i, const int j, const int sudoku
   
   // BEG TODO
   
+  //define 3*3 portions of the puzzle
+  int rowDivider = i/3, colDivider = j/3;
+  
+  //loop through every value
+  for(int col = 0; col < 3; col++){
+    for(int row = 0; row < 3; row++){
+      if (val==sudoku[row+rowDivider*3][col+colDivider*3])
+	return 1;
+    }
+  }
   return 0;
   // END TODO
 }
@@ -49,6 +70,14 @@ int is_val_valid(const int val, const int i, const int j, const int sudoku[9][9]
   assert(i>=0 && i<9 && j>=0 && j<9);
 
   // BEG TODO
+
+  //checks validity based on whether or not the number exists in the three possible locations
+  int theBoxByRoddyRich = is_val_in_3x3_zone(val, i, j, sudoku);
+  int row = is_val_in_row(val, i, sudoku);
+  int column = is_val_in_col(val, j, sudoku);
+
+  if(theBoxByRoddyRich || row || column)
+    return 0;
   return 1;
   // END TODO
 }
@@ -59,7 +88,26 @@ int solve_sudoku(int sudoku[9][9]) {
 
   // BEG TODO.
 
-  return 0;
+  //loops through and finds empty space
+  //loops through possible values for the space and tests them
+  //uses this method recursively until every space is full and valid
+  for(int row = 0; row < 9; row++){
+    for(int col = 0; col < 9; col++){
+      if(sudoku[row][col]==0){
+	for(int num = 1; num<=9; num++){
+	  if(is_val_valid(num, row, col, sudoku)==1){
+	    sudoku[row][col]=num;
+	    if(solve_sudoku(sudoku)){
+	      return 1;
+	    }
+	    sudoku[row][col]=0;
+	  }
+	}
+	return 0;
+      }
+    }
+  }
+  return 1;
   // END TODO.
 }
 
