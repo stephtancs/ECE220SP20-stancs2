@@ -1,3 +1,8 @@
+/*This program creates and plays an instance of the 2048, a game whose peak popularity was in 2012. Each move function indicates a slide in the board in a particular direction.
+ *
+ * partners: stancs2, asanag2, anudeep2
+ */
+
 #include "game.h"
 
 
@@ -14,8 +19,15 @@ game * make_game(int rows, int cols)
     mygame->cells = malloc(rows*cols*sizeof(cell));
 
     //YOUR CODE STARTS HERE:  Initialize all other variables in game struct
-
-
+	mygame->rows = rows;
+	mygame->cols = cols;
+	mygame->score = 0;
+	
+	// initializes cells to -1
+	for(int i = 0; i < rows * cols; i++)
+	{
+		*(mygame->cells + i) = -1;
+	}
     return mygame;
 }
 
@@ -33,6 +45,16 @@ void remake_game(game ** _cur_game_ptr,int new_rows,int new_cols)
 
 	 //YOUR CODE STARTS HERE:  Re-initialize all other variables in game struct
 
+	//reassigns pointers to new sizes
+	(*_cur_game_ptr)->rows = new_rows;
+	(*_cur_game_ptr)->cols = new_cols;
+	(*_cur_game_ptr)->score = 0;
+	
+	// initializes all cells to -1
+	for(int i = 0; i < new_rows * new_cols; i++)
+	{
+		*((*_cur_game_ptr)->cells + i) = -1;
+	}
 	return;	
 }
 
@@ -54,7 +76,12 @@ cell * get_cell(game * cur_game, int row, int col)
 */
 {
     //YOUR CODE STARTS HERE
-
+	
+	// rn+c
+	if(row >= 0 && row <= cur_game->rows && col >= 0 && col <= cur_game->cols)
+	{
+		return cur_game->cells + (row * cur_game->cols) + col;	
+	}
     return NULL;
 }
 
@@ -67,27 +94,323 @@ int move_w(game * cur_game)
 */
 {
     //YOUR CODE STARTS HERE
-
+	int row, col, targetRow;
+	int returnValue = 0;
+	
+	for(col = 0; col < cur_game->cols; col++)
+	{
+		targetRow = 0;
+		for(row = 0; row < cur_game->rows; row++)
+		{
+			// checks if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				
+				// find first empty row
+				while(*(get_cell(cur_game, targetRow, col)) != -1 && targetRow < row)
+				{
+					targetRow++;
+				}
+				
+				// shift tiles if empty row is before current row
+				if(targetRow < row)
+				{
+					*get_cell(cur_game, targetRow, col) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	for(col = 0; col < cur_game->cols; col++)
+	{
+		// from first to second-to-last row
+		for(row = 0; row < cur_game->rows - 1; row++)
+		{
+			// check if cell is empty
+			if(*get_cell(cur_game, row, col) != -1)
+			{
+				// merge if cell below current cell is the same value
+				if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row + 1, col))
+				{
+					*get_cell(cur_game, row, col) *= 2;
+					*get_cell(cur_game, row + 1, col) = -1;
+					cur_game->score += *get_cell(cur_game, row, col);
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	for(col = 0; col < cur_game->cols; col++)
+	{
+		targetRow = 0;
+		for(row = 0; row < cur_game->rows; row++)
+		{
+			// check if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				// find first empty row
+				while(*(get_cell(cur_game, targetRow, col)) != -1 && targetRow < row)
+				{
+					targetRow++;
+				}
+				// shift if the empty row is before the current row
+				if(targetRow < row)
+				{
+					*get_cell(cur_game, targetRow, col) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	// check if w is an invalid move by checking for positive return
+	if(returnValue == 0)
+	{
+		return 0;
+	}
     return 1;
 };
 
-int move_s(game * cur_game) //slide down
+int move_s(game * cur_game) //move down
 {
     //YOUR CODE STARTS HERE
-
+	int row, col, targetRow;
+	int returnValue = 0;
+	
+	for(col = 0; col < cur_game->cols; col++)
+	{
+		targetRow = cur_game->rows - 1;
+		
+		for(row = cur_game->rows - 1; row >= 0; row--)
+		{
+			// check if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				// find first empty row
+				while(*(get_cell(cur_game, targetRow, col)) != -1 && targetRow > row)
+				{
+					targetRow--;
+				}
+				// shift if the empty row is before the current row
+				if(targetRow > row)
+				{
+					*get_cell(cur_game, targetRow, col) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	for(col = 0; col < cur_game->cols; col++)
+	{
+		for(row = cur_game->rows - 1; row > 0; row--)
+		{
+			// check if cell is empty
+			if(*get_cell(cur_game, row, col) != -1)
+			{
+				// merge if the cell above is the same value
+				if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row - 1, col))
+				{
+					*get_cell(cur_game, row, col) *= 2;
+					*get_cell(cur_game, row - 1, col) = -1;
+					cur_game->score += *get_cell(cur_game, row, col);
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	for(col = 0; col < cur_game->cols; col++)
+	{
+		targetRow = cur_game->rows - 1;
+		for(row = cur_game->rows - 1; row >= 0; row--)
+		{
+			// check if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				// find first possible empty row
+				while(*(get_cell(cur_game, targetRow, col)) != -1 && targetRow > row)
+				{
+					targetRow--;
+				}
+				// shift if empty row is before current row
+				if(targetRow > row)
+				{
+					*get_cell(cur_game, targetRow, col) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	// check if s is valid
+	if(returnValue == 0)
+	{
+		return 0;
+	}
     return 1;
 };
 
-int move_a(game * cur_game) //slide left
+int move_a(game * cur_game) //move left
 {
     //YOUR CODE STARTS HERE
-
+	int row, col, targetCol;
+	int returnValue = 0;
+	
+	for(row = 0; row < cur_game->rows; row++)
+	{
+		targetCol = 0;
+		
+		for(col = 0; col < cur_game->cols; col++)
+		{
+			// check if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				// find first empty column
+				while(*(get_cell(cur_game, row, targetCol)) != -1 && targetCol < col)
+				{
+					targetCol++;
+				}
+				// shift if the empty column is before the current column
+				if(targetCol < col)
+				{
+					*get_cell(cur_game, row, targetCol) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	
+	for(row = 0; row < cur_game->rows; row++)
+	{
+		// from first to second-to-last column
+		for(col = 0; col < cur_game->cols - 1; col++)
+		{
+			// check if cell is empty
+			if(*get_cell(cur_game, row, col) != -1)
+			{
+				// merge if right cell is same value
+				if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row, col + 1))
+				{
+					*get_cell(cur_game, row, col) *= 2;
+					*get_cell(cur_game, row, col + 1) = -1;
+					cur_game->score += *get_cell(cur_game, row, col);
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	// iterate through each row
+	for(row = 0; row < cur_game->rows; row++)
+	{
+		targetCol = 0;
+		// iterate through each column
+		for(col = 0; col < cur_game->cols; col++)
+		{
+			// check if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				// find first possible empty column
+				while(*(get_cell(cur_game, row, targetCol)) != -1 && targetCol < col)
+				{
+					targetCol++;
+				}
+				// shift if empty column is before current column
+				if(targetCol < col)
+				{
+					*get_cell(cur_game, row, targetCol) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	// check if a is valid
+	if(returnValue == 0)
+	{
+		return 0;
+	}
     return 1;
 };
 
-int move_d(game * cur_game){ //slide to the right
+int move_d(game * cur_game){ //move right
     //YOUR CODE STARTS HERE
+	int row, col, targetCol;
+	int returnValue = 0;
+	
+	for(row = 0; row < cur_game->rows; row++)
+	{
+		targetCol = cur_game->cols - 1;
+		
+		for(col = cur_game->cols - 1; col >= 0; col--)
+		{
+			// check if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				// find first possible empty column
+				while(*(get_cell(cur_game, row, targetCol)) != -1 && targetCol > col)
+				{
+					targetCol--;
+				}
+				// shift if empty column is before current column
+				if(targetCol > col)
+				{
+					*get_cell(cur_game, row, targetCol) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	for(row = 0; row < cur_game->rows; row++)
+	{
+		for(col = cur_game->cols - 1; col > 0; col--)
+		{
+			// check if cell is empty
+			if(*get_cell(cur_game, row, col) != -1)
+			{
+				// merge if left cell has same value
+				if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row, col - 1))
+				{
+					*get_cell(cur_game, row, col) *= 2;
+					*get_cell(cur_game, row, col - 1) = -1;
+					cur_game->score += *get_cell(cur_game, row, col);
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	
+	for(row = 0; row < cur_game->rows; row++)
+	{
+		targetCol = cur_game->cols - 1;
 
+		for(col = cur_game->cols - 1; col >= 0; col--)
+		{
+			// check if cell is empty
+			if(*(get_cell(cur_game, row, col)) != -1)
+			{
+				// find first empty column
+				while(*(get_cell(cur_game, row, targetCol)) != -1 && targetCol > col)
+				{
+					targetCol--;
+				}
+				// shift if empty column is before current column
+				if(targetCol > col)
+				{
+					*get_cell(cur_game, row, targetCol) = *get_cell(cur_game, row, col);
+					*get_cell(cur_game, row, col) = -1;
+					returnValue = 1;
+				}
+			}
+		}
+	}
+	// check if d is valid
+	if(returnValue == 0)
+	{
+		return 0;
+	}
     return 1;
 };
 
@@ -98,7 +421,60 @@ int legal_move_check(game * cur_game)
  */
 {
     //YOUR CODE STARTS HERE
-
+	int returnVal = 0;
+	
+	for(int row = 0; row < cur_game->rows; row++)
+	{
+		for(int col = 0; col < cur_game->cols; col++)
+		{
+			// legal move exists if empty cell
+			if(*get_cell(cur_game, row, col) == -1)
+			{
+				returnVal = 1;
+			}
+			// check if cell is empty
+			if(*get_cell(cur_game, row, col) != -1)
+			{
+				// legal move exists if above cell = current
+				if(row-1 >= 0)
+				{
+					if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row-1, col))
+					{
+						returnVal = 1;
+					}
+				}
+				// legal move exists if below cell = current
+				if(row+1 < cur_game->rows)
+				{
+					if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row+1, col))
+					{
+						returnVal = 1;
+					}
+				}
+				// legal move exists if left cell = current
+				if(col-1 >= 0)
+				{
+					if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row, col-1))
+					{
+						returnVal = 1;
+					}
+				}
+				// legal move exists if right cell = current
+				if(col+1 < cur_game->cols)
+				{
+					if(*get_cell(cur_game, row, col) == *get_cell(cur_game, row, col+1))
+					{
+						returnVal = 1;
+					}
+				}
+			}
+		}
+	}
+	// check legality
+	if(returnVal == 0)
+	{
+		return 0;
+	}
     return 1;
 }
 
