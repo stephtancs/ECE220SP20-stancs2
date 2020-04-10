@@ -13,7 +13,7 @@ void print_matirx(int arr[][n]){
   }
 }
 
-
+//initializes first row based on given conditions with random integers
 void init_1st_row(int arr[][n]){
   // Your code starts here
   arr[0][0] = 0;
@@ -21,14 +21,14 @@ void init_1st_row(int arr[][n]){
     arr[0][i] = (rand())%100;
 }
 
-
+//initializes first column based on conditions with random integers
 void init_1st_col(int arr[][n]){
   // Your code starts here
   for(int i = 1; i < n; i++)
     arr[i][0] = (rand())%100;
 }
 
-
+//i used the exact algorithm from the test paper
 void build_matrix_max(int arr[][n]){
   // Your code starts here
   int i = 1, j = 1; 
